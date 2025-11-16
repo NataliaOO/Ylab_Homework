@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="
+          http://www.liquibase.org/xml/ns/dbchangelog
+          http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.23.xsd">
+
+    <changeSet id="02-insert-products" author="dmitry">
+        <insert schemaName="${app.schema}" tableName="product">
+            <column name="name" value="Pen"/>
+            <column name="price" valueNumeric="2.00"/>
+            <column name="quantity_in_stock" valueNumeric="100"/>
+        </insert>
+
+        <insert schemaName="${app.schema}" tableName="product">
+            <column name="name" value="Notebook"/>
+            <column name="price" valueNumeric="5.50"/>
+            <column name="quantity_in_stock" valueNumeric="50"/>
+        </insert>
+
+        <insert schemaName="${app.schema}" tableName="product">
+            <column name="name" value="Pencil"/>
+            <column name="price" valueNumeric="1.00"/>
+            <column name="quantity_in_stock" valueNumeric="200"/>
+        </insert>
+    </changeSet>
+
+</databaseChangeLog>

@@ -2,10 +2,15 @@ package com.marketplace.catalog.service;
 
 import org.junit.jupiter.api.Test;
 
-import static com.marketplace.catalog.TestConstants.*;
+import java.util.concurrent.TimeUnit;
+
+import static com.marketplace.catalog.TestConstants.DELTA;
 import static org.junit.jupiter.api.Assertions.*;
 
 class MetricsServiceTest {
+
+    private static final long ONE_MS_NANOS   = TimeUnit.MILLISECONDS.toNanos(1);
+    private static final long THREE_MS_NANOS = TimeUnit.MILLISECONDS.toNanos(3);
 
     @Test
     void recordCreateUpdateDelete_shouldIncreaseCounters() {
@@ -23,18 +28,16 @@ class MetricsServiceTest {
     }
 
     @Test
-    void recordSearch_shouldUpdateSearchCountAndAverageTimeAndCacheHit() {
+    void recordSearch_shouldUpdateSearchCountAverageTimeAndCacheHit() {
         Metrics metrics = new InMemoryMetrics();
 
-        metrics.recordSearch(ONE_MS_NANOS, false); // 1 ms
-        metrics.recordSearch(THREE_MS_NANOS, true);  // 3 ms
+        metrics.recordSearch(ONE_MS_NANOS, false);  // 1 ms
+        metrics.recordSearch(THREE_MS_NANOS, true); // 3 ms
 
         assertEquals(2, metrics.getSearchCount());
         assertEquals(1, metrics.getCacheHitCount());
         assertEquals(0.5, metrics.getCacheHitRatio(), DELTA);
 
-        double avgMillis = metrics.getAverageSearchTimeMillis();
-        assertTrue(avgMillis >= 1.0 && avgMillis <= 3.0,
-                "Среднее время должно быть между 1 и 3 ms");
+        assertEquals(2.0, metrics.getAverageSearchTimeMillis(), 0.001);
     }
 }

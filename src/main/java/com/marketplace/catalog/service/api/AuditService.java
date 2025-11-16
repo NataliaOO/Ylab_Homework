@@ -1,4 +1,4 @@
-package com.marketplace.catalog.service;
+package com.marketplace.catalog.service.api;
 
 import com.marketplace.catalog.model.AuditRecord;
 import com.marketplace.catalog.repository.AuditRepository;

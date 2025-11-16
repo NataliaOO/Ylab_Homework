@@ -1,4 +1,4 @@
-package com.marketplace.catalog.service;
+package com.marketplace.catalog.service.api;
 
 import com.marketplace.catalog.exception.ProductValidationException;
 import com.marketplace.catalog.model.AuditRecord;
@@ -6,6 +6,7 @@ import com.marketplace.catalog.model.Category;
 import com.marketplace.catalog.model.Product;
 import com.marketplace.catalog.repository.AuditRepository;
 import com.marketplace.catalog.repository.ProductRepository;
+import com.marketplace.catalog.service.Metrics;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -19,7 +20,7 @@ public class ProductService {
 
     private final ProductRepository productRepository;
     private final AuditRepository auditRepository;
-    private final Metrics  metrics;
+    private final Metrics metrics;
 
     private final Map<String, List<Product>> searchCache = new HashMap<>();
 

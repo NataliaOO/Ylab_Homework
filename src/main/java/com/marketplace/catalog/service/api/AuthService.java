@@ -1,9 +1,10 @@
-package com.marketplace.catalog.service;
+package com.marketplace.catalog.service.api;
 
 import com.marketplace.catalog.model.AuditRecord;
 import com.marketplace.catalog.model.User;
 import com.marketplace.catalog.repository.AuditRepository;
 import com.marketplace.catalog.repository.UserRepository;
+import lombok.Getter;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -11,6 +12,7 @@ import java.util.Optional;
 /**
  * Сервис авторизации пользователей.
  */
+@Getter
 public class AuthService {
 
     private final UserRepository userRepository;
@@ -45,13 +47,6 @@ public class AuthService {
                     "LOGOUT", "User logged out"));
         }
         currentUser = null;
-    }
-
-    /**
-     * Возвращает текущего пользователя.
-     */
-    public User getCurrentUser() {
-        return currentUser;
     }
 
     /**

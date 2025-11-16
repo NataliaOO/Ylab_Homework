@@ -1,9 +1,11 @@
 package com.marketplace.catalog.console;
 
-import com.marketplace.catalog.exception.ProductValidationException;
 import com.marketplace.catalog.model.Category;
 import com.marketplace.catalog.model.Product;
 import com.marketplace.catalog.service.*;
+import com.marketplace.catalog.service.api.AuditService;
+import com.marketplace.catalog.service.api.AuthService;
+import com.marketplace.catalog.service.api.ProductService;
 
 import java.math.BigDecimal;
 import java.util.List;
