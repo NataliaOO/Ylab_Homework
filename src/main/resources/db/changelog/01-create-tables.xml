@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="
+          http://www.liquibase.org/xml/ns/dbchangelog
+          http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.23.xsd">
+
+    <changeSet id="01-create-product-table" author="natalia">
+        <createTable schemaName="${app.schema}" tableName="product">
+            <column name="id" type="BIGSERIAL">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+
+            <column name="name" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="brand" type="VARCHAR(255)"/>
+
+            <column name="category" type="VARCHAR(255)"/>
+
+            <column name="price" type="NUMERIC(19,2)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="description" type="TEXT"/>
+        </createTable>
+
+        <createIndex
+                schemaName="${app.schema}"
+                tableName="product"
+                indexName="idx_product_name">
+            <column name="name"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="01-create-users-table" author="natalia">
+        <createTable schemaName="${app.schema}" tableName="users">
+            <column name="id" type="BIGSERIAL">
+                <constraints primaryKey="true"
+                             nullable="false"
+                             primaryKeyName="pk_app_user"/>
+            </column>
+
+            <column name="login" type="VARCHAR(64)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+
+            <column name="password" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="role" type="VARCHAR(32)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <createIndex
+                schemaName="${app.schema}"
+                tableName="users"
+                indexName="idx_users_login">
+            <column name="login"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="01-create-audit-table" author="natalia">
+        <createTable schemaName="${app.schema}" tableName="audit">
+            <column name="id" type="BIGSERIAL">
+                <constraints primaryKey="true"
+                             nullable="false"
+                             primaryKeyName="pk_audit"/>
+            </column>
+
+            <!-- поле для AuditRecord.timestamp -->
+            <column name="created_at" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+
+            <!-- AuditRecord.username -->
+            <column name="username" type="VARCHAR(64)">
+                <constraints nullable="false"/>
+            </column>
+
+            <!-- AuditRecord.action -->
+            <column name="action" type="VARCHAR(64)">
+                <constraints nullable="false"/>
+            </column>
+
+            <!-- AuditRecord.details -->
+            <column name="details" type="TEXT"/>
+        </createTable>
+    </changeSet>
+
+</databaseChangeLog>
