@@ -1,64 +1,31 @@
 package com.marketplace.catalog.service;
 
-import com.marketplace.catalog.model.AuditRecord;
 import com.marketplace.catalog.model.User;
-import com.marketplace.catalog.repository.AuditRepository;
-import com.marketplace.catalog.repository.UserRepository;
-
-import java.time.LocalDateTime;
-import java.util.Optional;
 
 /**
- * Сервис авторизации пользователей.
+ * Контракт сервиса авторизации пользователей.
  */
-public class AuthService {
-
-    private final UserRepository userRepository;
-    private final AuditRepository auditRepository;
-    private User currentUser;
-
-    public AuthService(UserRepository userRepository, AuditRepository auditRepository) {
-        this.userRepository = userRepository;
-        this.auditRepository = auditRepository;
-    }
+public interface AuthService {
 
     /**
      * Выполняет вход пользователя по логину и паролю.
+     *
+     * @return true, если вход успешен
      */
-    public boolean login(String login, String password) {
-        Optional<User> userOpt = userRepository.findByLogin(login);
-        if (userOpt.isPresent() && userOpt.get().getPassword().equals(password)) {
-            currentUser = userOpt.get();
-            auditRepository.save(new AuditRecord(LocalDateTime.now(), currentUser.getLogin(),
-                    "LOGIN", "User logged in"));
-            return true;
-        }
-        return false;
-    }
+    boolean login(String login, String password);
 
     /**
      * Выполняет выход текущего пользователя.
      */
-    public void logout() {
-        if (currentUser != null) {
-            auditRepository.save(new AuditRecord(LocalDateTime.now(), currentUser.getLogin(),
-                    "LOGOUT", "User logged out"));
-        }
-        currentUser = null;
-    }
+    void logout();
 
     /**
-     * Возвращает текущего пользователя.
+     * Является ли текущий пользователь администратором.
      */
-    public User getCurrentUser() {
-        return currentUser;
-    }
+    boolean isAdmin();
 
     /**
-     * Проверяет, является ли текущий пользователь администратором.
+     * Текущий авторизованный пользователь (может быть null).
      */
-    public boolean isAdmin() {
-        return currentUser != null && currentUser.getRole() != null
-                && currentUser.getRole().name().equals("ADMIN");
-    }
+    User getCurrentUser();
 }

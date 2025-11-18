@@ -1,7 +1,8 @@
 # IntelliJ / IDEA
 .idea/
 *.iml
-*.iws
+products.dat
+audit.dat
 
 # Maven
 target/

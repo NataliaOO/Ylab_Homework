@@ -1,4 +1,6 @@
-package com.marketplace.catalog.service;
+package com.marketplace.catalog.service.impl;
+
+import com.marketplace.catalog.service.Metrics;
 
 /**
  * In-memory реализация сервиса метрик.

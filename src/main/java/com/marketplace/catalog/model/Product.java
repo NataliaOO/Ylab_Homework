@@ -1,13 +1,17 @@
 package com.marketplace.catalog.model;
 
+import lombok.*;
+
 import java.io.Serializable;
 import java.math.BigDecimal;
-import java.util.Objects;
 
 /**
  * Представляет товар в каталоге маркетплейса.
  * Содержит основную информацию о товаре.
  */
+@Getter
+@Setter
+@ToString
 public class Product implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -24,8 +28,6 @@ public class Product implements Serializable {
     private BigDecimal price;
     /** Описание товара. */
     private String description;
-    /** Признак активности товара. */
-    private boolean active = true;
 
     /**
      * Создаёт новый товар.
@@ -49,74 +51,6 @@ public class Product implements Serializable {
         this.category = category;
         this.price = price;
         this.description = description;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public String getBrand() {
-        return brand;
-    }
-
-    public Category getCategory() {
-        return category;
-    }
-
-    public BigDecimal getPrice() {
-        return price;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public boolean isActive() {
-        return active;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public void setBrand(String brand) {
-        this.brand = brand;
-    }
-
-    public void setCategory(Category category) {
-        this.category = category;
-    }
-
-    public void setPrice(BigDecimal price) {
-        this.price = price;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public void setActive(boolean active) {
-        this.active = active;
-    }
-
-    @Override
-    public String toString() {
-        return "Product{" +
-               "id=" + id +
-               ", name='" + name + "'" +
-               ", brand='" + brand + "'" +
-               ", category=" + category +
-               ", price=" + price +
-               ", active=" + active +
-               '}';
     }
 
     @Override

@@ -16,4 +16,6 @@ public interface UserRepository {
      * @return Optional с пользователем, если найден
      */
     Optional<User> findByLogin(String login);
+
+    User save(User user);
 }

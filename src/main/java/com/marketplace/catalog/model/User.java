@@ -1,9 +1,16 @@
 package com.marketplace.catalog.model;
 
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
+
 /**
  * Пользователь системы каталога.
  * Используется для авторизации и проверки прав доступа.
  */
+@Getter
+@Setter
+@ToString
 public class User {
 
     private Long id;
@@ -24,21 +31,5 @@ public class User {
         this.login = login;
         this.password = password;
         this.role = role;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public String getLogin() {
-        return login;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public Role getRole() {
-        return role;
     }
 }

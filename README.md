@@ -30,14 +30,57 @@
 
 - JDK: 17+
 - Maven: 3.8+
+- PostgreSQL 16 (в Docker)
+- Liquibase (XML changelog’и)
+- JDBC
+- Testcontainers (PostgreSQL)
+- Docker + docker-compose
 
-## 2. Сборка
+## 2. Хранение данных и БД
+
+Все данные теперь хранятся в **PostgreSQL**:
+
+- **Таблицы сущностей** находятся в схеме `catalog`:
+  - `catalog.product` — товары;
+  - `catalog.audit` — записи аудита;
+  - `catalog.users` — пользователи.
+- **Идентификаторы** генерируются через **sequence** (используется `BIGSERIAL` / sequence в DDL).
+- **Служебные таблицы Liquibase** находятся в отдельной схеме,  
+  а таблицы доменных сущностей в `catalog`.
+
+## 3. Миграции БД (Liquibase)
+
+Все DDL-скрипты и скрипты предзаполнения выполняются **только Liquibase**.
+
+- Changelog’и находятся в каталоге, например:
+  - `src/main/resources/db/changelog/db.changelog-master.xml` — мастер-файл;
+  - `src/main/resources/db/changelog/00-create-schema.xml` — создание схем (`catalog`, `service` и т.п.);
+  - `src/main/resources/db/changelog/01-create-tables.xml` — создание таблиц (`product`, `audit`, `users`, последовательностей и индексов);
+  - `src/main/resources/db/changelog/02-insert-data.xml` — предзаполнение тестовыми данными (пользователи, пары демо-товаров и т.п.).
+
+## 4. PostgreSQL в Docker (docker-compose)
+
+Для разработки используется Docker + docker-compose.
+В корне проекта находится файл docker-compose.yml, который поднимает контейнер с PostgreSQL.
+
+Запуск PostgreSQL через Docker
+
+Из корня проекта:
+```
+docker-compose up -d
+```
+Проверить, что контейнер поднялся:
+```
+docker ps
+```
+
+## 5. Сборка
 Из корня проекта:
 ```
 mvn clean package
 ```
 
-## 3. Запуск
+## 6. Запуск
 
 ```
 java -jar target/product-catalog-service-1.0-SNAPSHOT.jar
@@ -45,14 +88,19 @@ java -jar target/product-catalog-service-1.0-SNAPSHOT.jar
 
 Или запустить класс `com.marketplace.catalog.Main` из IDE.
 
-## 4. Пользователи
+## 7. Пользователи
 
-См. `InMemoryUserRepository`:
+Пользователи теперь хранятся в таблице catalog.users (через JdbcUserRepository).
+Тестовые пользователи создаются миграциями или в коде инициализации БД.
 
-- admin / admin (ADMIN)
-- user / user (VIEWER)
+Пример стандартных пользователей:
 
-## 5. Тесты
+admin / admin — роль ADMIN
+
+user / user — роль VIEWER
+
+## 8. Тесты
+Добавлены интеграционные тесты
 
 Для запуска всех модульных тестов:
 
