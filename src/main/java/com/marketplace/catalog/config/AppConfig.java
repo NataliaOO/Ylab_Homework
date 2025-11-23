@@ -5,13 +5,13 @@ import com.marketplace.catalog.exception.ConfigException;
 import java.io.InputStream;
 import java.util.Properties;
 
-public class AppConfig {
-    public static final String APPLICATION_PROPERTIES = "application.properties";
-    public static final String DB_URL      = "db.url";
-    public static final String DB_USER     = "db.user";
-    public static final String DB_PASSWORD = "db.password";
-    public static final String DB_SCHEMA   = "db.schema";
-    public static final String LIQUIBASE_CHANGELOG = "liquibase.changelog";
+public class AppConfig implements Config {
+    private static final String APPLICATION_PROPERTIES = "application.properties";
+    private static final String DB_URL      = "db.url";
+    private static final String DB_USER     = "db.user";
+    private static final String DB_PASSWORD = "db.password";
+    private static final String DB_SCHEMA   = "db.schema";
+    private static final String LIQUIBASE_CHANGELOG = "liquibase.changelog";
 
     private final Properties PROPS = new Properties();
 
@@ -27,11 +27,32 @@ public class AppConfig {
             throw new ConfigException("Failed to load application.properties", e);
         }
     }
-    public String get(String key) {
+    private String get(String key) {
         String sys = System.getProperty(key);
         if (sys != null) return sys;
         String v = PROPS.getProperty(key);
         if (v == null) throw new ConfigException("Missing key: " + key);
         return v;
+    }
+
+    @Override
+    public String getDbUrl() {
+        return get(DB_URL);
+    }
+    @Override
+    public String getDbUser() {
+        return get(DB_USER);
+    }
+    @Override
+    public String getDbPassword() {
+        return get(DB_PASSWORD);
+    }
+    @Override
+    public String getDbSchema() {
+        return get(DB_SCHEMA);
+    }
+    @Override
+    public String getLiquibaseChangelog() {
+        return get(LIQUIBASE_CHANGELOG);
     }
 }
