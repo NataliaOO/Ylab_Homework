@@ -1,6 +1,6 @@
 package com.marketplace.catalog.db;
 
-import com.marketplace.catalog.config.AppConfig;
+import com.marketplace.catalog.config.Config;
 import com.marketplace.catalog.exception.MigrationException;
 import liquibase.Contexts;
 import liquibase.LabelExpression;
@@ -15,13 +15,19 @@ import java.sql.Connection;
 public final class LiquibaseRunner {
     private static final String PARAM_SCHEMA = "schema";
 
-    private LiquibaseRunner() { }
+    private final Config config;
+    private final ConnectionFactory connectionFactory;
 
-    public static void migrate() {
-        String changelog = AppConfig.get(AppConfig.LIQUIBASE_CHANGELOG);
-        String schema = AppConfig.get(AppConfig.DB_SCHEMA);
+    public LiquibaseRunner(Config config, ConnectionFactory connectionFactory) {
+        this.config = config;
+        this.connectionFactory = connectionFactory;
+    }
 
-        try (Connection conn = ConnectionFactory.getConnection()) {
+    public void migrate() {
+        String changelog = config.getLiquibaseChangelog();
+        String schema    = config.getDbSchema();
+
+        try (Connection conn = connectionFactory.getConnection()) {
             Database database = DatabaseFactory.getInstance()
                     .findCorrectDatabaseImplementation(new JdbcConnection(conn));
 

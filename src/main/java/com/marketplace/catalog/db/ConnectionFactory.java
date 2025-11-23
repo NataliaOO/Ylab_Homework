@@ -1,6 +1,6 @@
 package com.marketplace.catalog.db;
 
-import com.marketplace.catalog.config.AppConfig;
+import com.marketplace.catalog.config.Config;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -11,10 +11,15 @@ public final class ConnectionFactory {
     private final String user;
     private final String password;
 
-    public ConnectionFactory(AppConfig config) {
-        this.url      = config.get(AppConfig.DB_URL);
-        this.user     = config.get(AppConfig.DB_USER);
-        this.password = config.get(AppConfig.DB_PASSWORD);
+    public ConnectionFactory(Config config) {
+        try {
+            Class.forName("org.postgresql.Driver");
+        } catch (ClassNotFoundException e) {
+            throw new IllegalStateException("PostgreSQL JDBC driver not found in classpath", e);
+        }
+        this.url      = config.getDbUrl();
+        this.user     = config.getDbUser();
+        this.password = config.getDbPassword();
     }
 
     public Connection getConnection() throws SQLException {
