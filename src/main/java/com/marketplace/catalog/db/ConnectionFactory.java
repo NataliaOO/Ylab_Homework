@@ -7,14 +7,17 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 
 public final class ConnectionFactory {
-    private static final String URL = AppConfig.get(AppConfig.DB_URL);
-    private static final String USER = AppConfig.get(AppConfig.DB_USER);
-    private static final String PASSWORD = AppConfig.get(AppConfig.DB_PASSWORD);
+    private final String url;
+    private final String user;
+    private final String password;
 
-    private ConnectionFactory() {
+    public ConnectionFactory(AppConfig config) {
+        this.url      = config.get(AppConfig.DB_URL);
+        this.user     = config.get(AppConfig.DB_USER);
+        this.password = config.get(AppConfig.DB_PASSWORD);
     }
 
-    public static Connection getConnection() throws SQLException {
-        return DriverManager.getConnection(URL, USER, PASSWORD);
+    public Connection getConnection() throws SQLException {
+        return DriverManager.getConnection(url, user, password);
     }
 }

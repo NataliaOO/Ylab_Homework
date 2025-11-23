@@ -1,6 +1,7 @@
 package com.marketplace.catalog.repository.impl.jdbc;
 
 import com.marketplace.catalog.config.AppConfig;
+import com.marketplace.catalog.exception.RepositoryException;
 import com.marketplace.catalog.model.Category;
 import com.marketplace.catalog.model.Product;
 import com.marketplace.catalog.repository.ProductRepository;
@@ -84,6 +85,12 @@ public class JdbcProductRepository implements ProductRepository {
     private static final String ERR_UPDATE = "Update product failed";
     private static final String ERR_QUERY  = "Query product failed";
     private static final String ERR_DELETE = "Delete product failed";
+    private final ConnectionFactory connectionFactory;
+
+    public JdbcProductRepository(ConnectionFactory connectionFactory) {
+        this.connectionFactory = connectionFactory;
+
+    }
 
     @Override
     public Product save(Product product) {
@@ -95,7 +102,7 @@ public class JdbcProductRepository implements ProductRepository {
     }
 
     private Product insert(Product p) {
-        try (Connection c = ConnectionFactory.getConnection();
+        try (Connection c = connectionFactory.getConnection();
              PreparedStatement ps = c.prepareStatement(SQL_INSERT)) {
 
             ps.setString(1, p.getName());
@@ -111,12 +118,12 @@ public class JdbcProductRepository implements ProductRepository {
             }
             return p;
         } catch (SQLException e) {
-            throw new RuntimeException(ERR_INSERT, e);
+            throw new RepositoryException(ERR_INSERT, e);
         }
     }
 
     private Product update(Product p) {
-        try (Connection c = ConnectionFactory.getConnection();
+        try (Connection c = connectionFactory.getConnection();
              PreparedStatement ps = c.prepareStatement(SQL_UPDATE)) {
 
             ps.setString(1, p.getName());
@@ -129,13 +136,13 @@ public class JdbcProductRepository implements ProductRepository {
             ps.executeUpdate();
             return p;
         } catch (SQLException e) {
-            throw new RuntimeException(ERR_UPDATE, e);
+            throw new RepositoryException(ERR_UPDATE, e);
         }
     }
 
     @Override
     public Optional<Product> findById(Long id) {
-        try (Connection c = ConnectionFactory.getConnection();
+        try (Connection c = connectionFactory.getConnection();
              PreparedStatement ps = c.prepareStatement(SQL_FIND_BY_ID)) {
 
             ps.setLong(1, id);
@@ -146,13 +153,13 @@ public class JdbcProductRepository implements ProductRepository {
                 return Optional.empty();
             }
         } catch (SQLException e) {
-            throw new RuntimeException(ERR_QUERY, e);
+            throw new RepositoryException(ERR_QUERY, e);
         }
     }
 
     @Override
     public List<Product> findAll() {
-        try (Connection c = ConnectionFactory.getConnection();
+        try (Connection c = connectionFactory.getConnection();
              PreparedStatement ps = c.prepareStatement(SQL_FIND_ALL);
              ResultSet rs = ps.executeQuery()) {
 
@@ -162,35 +169,33 @@ public class JdbcProductRepository implements ProductRepository {
             }
             return result;
         } catch (SQLException e) {
-            throw new RuntimeException(ERR_QUERY, e);
+            throw new RepositoryException(ERR_QUERY, e);
         }
     }
 
     @Override
     public void deleteById(Long id) {
-        try (Connection c = ConnectionFactory.getConnection();
+        try (Connection c = connectionFactory.getConnection();
              PreparedStatement ps = c.prepareStatement(SQL_DELETE_BY_ID)) {
 
             ps.setLong(1, id);
             ps.executeUpdate();
         } catch (SQLException e) {
-            throw new RuntimeException(ERR_DELETE, e);
+            throw new RepositoryException(ERR_DELETE, e);
         }
     }
 
     @Override
     public long count() {
-        try (Connection c = ConnectionFactory.getConnection();
+        try (Connection c = connectionFactory.getConnection();
              PreparedStatement ps = c.prepareStatement(SQL_COUNT);
              ResultSet rs = ps.executeQuery()) {
 
             return rs.next() ? rs.getLong(1) : 0L;
         } catch (SQLException e) {
-            throw new RuntimeException(ERR_QUERY, e);
+            throw new RepositoryException(ERR_QUERY, e);
         }
     }
-
-    // ---- Маппинг ResultSet -> Product --------------------------------------
     private Product mapRow(ResultSet rs) throws SQLException {
         Long id = rs.getLong(COL_ID);
         String name = rs.getString(COL_NAME);

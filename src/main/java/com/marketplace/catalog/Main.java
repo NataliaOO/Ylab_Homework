@@ -1,6 +1,8 @@
 package com.marketplace.catalog;
 
+import com.marketplace.catalog.config.AppConfig;
 import com.marketplace.catalog.console.ConsoleApp;
+import com.marketplace.catalog.db.ConnectionFactory;
 import com.marketplace.catalog.db.LiquibaseRunner;
 import com.marketplace.catalog.repository.*;
 import com.marketplace.catalog.repository.impl.jdbc.*;
@@ -22,9 +24,11 @@ public class Main {
         LiquibaseRunner.migrate();
 
         // 2. Репозитории
-        ProductRepository productRepository = new JdbcProductRepository();
-        AuditRepository   auditRepository   = new JdbcAuditRepository();
-        UserRepository    userRepository    = new JdbcUserRepository();
+        AppConfig config = new AppConfig();
+        ConnectionFactory connectionFactory = new ConnectionFactory(config);
+        ProductRepository productRepository = new JdbcProductRepository(connectionFactory);
+        AuditRepository   auditRepository   = new JdbcAuditRepository(connectionFactory);
+        UserRepository    userRepository    = new JdbcUserRepository(connectionFactory);
 
         // 3. Сервисы
         Metrics metrics = new InMemoryMetrics();

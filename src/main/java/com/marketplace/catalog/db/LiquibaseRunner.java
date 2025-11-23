@@ -1,6 +1,7 @@
 package com.marketplace.catalog.db;
 
 import com.marketplace.catalog.config.AppConfig;
+import com.marketplace.catalog.exception.MigrationException;
 import liquibase.Contexts;
 import liquibase.LabelExpression;
 import liquibase.Liquibase;
@@ -37,7 +38,7 @@ public final class LiquibaseRunner {
 
             liquibase.update(new Contexts(), new LabelExpression());
         } catch (Exception e) {
-            throw new RuntimeException("Liquibase migration failed", e);
+            throw new MigrationException("Liquibase migration failed", e);
         }
     }
 }

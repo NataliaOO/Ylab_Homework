@@ -1,6 +1,7 @@
 package com.marketplace.catalog.repository.impl.jdbc;
 
 import com.marketplace.catalog.config.AppConfig;
+import com.marketplace.catalog.exception.RepositoryException;
 import com.marketplace.catalog.model.Role;
 import com.marketplace.catalog.model.User;
 import com.marketplace.catalog.repository.UserRepository;
@@ -53,6 +54,12 @@ public class JdbcUserRepository implements UserRepository {
     private static final String ERR_INSERT = "Insert user failed";
     private static final String ERR_QUERY  = "Query user failed";
 
+    private final ConnectionFactory connectionFactory;
+
+    public JdbcUserRepository(ConnectionFactory connectionFactory) {
+        this.connectionFactory = connectionFactory;
+    }
+
     @Override
     public User save(User user) {
         if (user.getId() == null) {
@@ -62,7 +69,7 @@ public class JdbcUserRepository implements UserRepository {
     }
 
     private User insert(User u) {
-        try (Connection c = ConnectionFactory.getConnection();
+        try (Connection c = connectionFactory.getConnection();
              PreparedStatement ps = c.prepareStatement(SQL_INSERT)) {
 
             ps.setString(1, u.getLogin());
@@ -76,13 +83,13 @@ public class JdbcUserRepository implements UserRepository {
             }
             return u;
         } catch (SQLException e) {
-            throw new RuntimeException(ERR_INSERT, e);
+            throw new RepositoryException(ERR_INSERT, e);
         }
     }
 
     @Override
     public Optional<User> findByLogin(String login) {
-        try (Connection c = ConnectionFactory.getConnection();
+        try (Connection c = connectionFactory.getConnection();
              PreparedStatement ps = c.prepareStatement(SQL_FIND_BY_LOGIN)) {
 
             ps.setString(1, login);
@@ -93,7 +100,7 @@ public class JdbcUserRepository implements UserRepository {
                 return Optional.empty();
             }
         } catch (SQLException e) {
-            throw new RuntimeException(ERR_QUERY, e);
+            throw new RepositoryException(ERR_QUERY, e);
         }
     }
 

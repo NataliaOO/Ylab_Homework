@@ -1,6 +1,7 @@
 package com.marketplace.catalog.repository.impl.jdbc;
 
 import com.marketplace.catalog.config.AppConfig;
+import com.marketplace.catalog.exception.RepositoryException;
 import com.marketplace.catalog.model.AuditRecord;
 import com.marketplace.catalog.repository.AuditRepository;
 import com.marketplace.catalog.db.ConnectionFactory;
@@ -52,10 +53,15 @@ public class JdbcAuditRepository implements AuditRepository {
     private static final String ERR_INSERT = "Insert audit failed";
     private static final String ERR_QUERY  = "Query audit failed";
 
+    private final ConnectionFactory connectionFactory;
+
+    public JdbcAuditRepository(ConnectionFactory connectionFactory) {
+        this.connectionFactory = connectionFactory;
+    }
 
     @Override
     public void save(AuditRecord r) {
-        try (Connection c = ConnectionFactory.getConnection();
+        try (Connection c = connectionFactory.getConnection();
              PreparedStatement ps = c.prepareStatement(SQL_INSERT)) {
 
             // Порядок столбцов: ts, username, action, details
@@ -67,13 +73,13 @@ public class JdbcAuditRepository implements AuditRepository {
 
             ps.executeUpdate();
         } catch (SQLException e) {
-            throw new RuntimeException(ERR_INSERT, e);
+            throw new RepositoryException(ERR_INSERT, e);
         }
     }
 
     @Override
     public List<AuditRecord> findAll() {
-        try (Connection c = ConnectionFactory.getConnection();
+        try (Connection c = connectionFactory.getConnection();
              PreparedStatement ps = c.prepareStatement(SQL_FIND_ALL);
              ResultSet rs = ps.executeQuery()) {
 
@@ -83,7 +89,7 @@ public class JdbcAuditRepository implements AuditRepository {
             }
             return result;
         } catch (SQLException e) {
-            throw new RuntimeException(ERR_QUERY, e);
+            throw new RepositoryException(ERR_QUERY, e);
         }
     }
 
