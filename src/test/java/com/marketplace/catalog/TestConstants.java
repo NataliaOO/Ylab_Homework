@@ -1,16 +1,19 @@
 package com.marketplace.catalog;
 
-import java.util.concurrent.TimeUnit;
+import java.math.BigDecimal;
 
 public final class TestConstants {
     private TestConstants() {}
 
-    public static final long ONE_MS_NANOS   = TimeUnit.MILLISECONDS.toNanos(1);
-    public static final long THREE_MS_NANOS = TimeUnit.MILLISECONDS.toNanos(3);
-    public static final double DELTA = 1e-9;
+    // Доменные значения
+    public static final String BRAND_BIC = "Bic";
+    public static final String NAME_PEN = "Pen";
+    public static final String NAME_PEN_V2 = "Pen v2";
+    public static final String DESC_DEF = "desc";
 
-    public static final String ADMIN_LOGIN = "admin";
-    public static final String ADMIN_PASS  = "admin";
-    public static final String USER_LOGIN  = "user";
-    public static final String USER_PASS   = "user";
+    public static final BigDecimal PRICE_199 = new BigDecimal("1.99");
+    public static final BigDecimal PRICE_249 = new BigDecimal("2.49");
+
+    // Double сравнение
+    public static final double DELTA = 1e-9;
 }

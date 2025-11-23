@@ -1,0 +1,44 @@
+package com.marketplace.catalog.db;
+
+import com.marketplace.catalog.config.AppConfig;
+import com.marketplace.catalog.exception.MigrationException;
+import liquibase.Contexts;
+import liquibase.LabelExpression;
+import liquibase.Liquibase;
+import liquibase.database.Database;
+import liquibase.database.DatabaseFactory;
+import liquibase.database.jvm.JdbcConnection;
+import liquibase.resource.ClassLoaderResourceAccessor;
+
+import java.sql.Connection;
+
+public final class LiquibaseRunner {
+    private static final String PARAM_SCHEMA = "schema";
+
+    private LiquibaseRunner() { }
+
+    public static void migrate() {
+        String changelog = AppConfig.get(AppConfig.LIQUIBASE_CHANGELOG);
+        String schema = AppConfig.get(AppConfig.DB_SCHEMA);
+
+        try (Connection conn = ConnectionFactory.getConnection()) {
+            Database database = DatabaseFactory.getInstance()
+                    .findCorrectDatabaseImplementation(new JdbcConnection(conn));
+
+            database.setLiquibaseSchemaName("public");
+            database.setDefaultSchemaName(schema);
+
+            Liquibase liquibase = new Liquibase(
+                    changelog,
+                    new ClassLoaderResourceAccessor(),
+                    database
+            );
+
+            liquibase.setChangeLogParameter(PARAM_SCHEMA, schema);
+
+            liquibase.update(new Contexts(), new LabelExpression());
+        } catch (Exception e) {
+            throw new MigrationException("Liquibase migration failed", e);
+        }
+    }
+}
