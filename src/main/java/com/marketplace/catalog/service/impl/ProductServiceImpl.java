@@ -1,16 +1,13 @@
 package com.marketplace.catalog.service.impl;
 
 import com.marketplace.catalog.exception.ProductValidationException;
-import com.marketplace.catalog.model.AuditRecord;
 import com.marketplace.catalog.model.Category;
 import com.marketplace.catalog.model.Product;
-import com.marketplace.catalog.repository.AuditRepository;
 import com.marketplace.catalog.repository.ProductRepository;
 import com.marketplace.catalog.service.Metrics;
 import com.marketplace.catalog.service.ProductService;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -20,16 +17,13 @@ import java.util.stream.Collectors;
 public class ProductServiceImpl  implements ProductService {
 
     private final ProductRepository productRepository;
-    private final AuditRepository auditRepository;
     private final Metrics metrics;
 
     private final Map<String, List<Product>> searchCache = new HashMap<>();
 
     public ProductServiceImpl(ProductRepository productRepository,
-                          AuditRepository auditRepository,
                           Metrics metrics) {
         this.productRepository = productRepository;
-        this.auditRepository = auditRepository;
         this.metrics = metrics;
     }
 
@@ -38,11 +32,8 @@ public class ProductServiceImpl  implements ProductService {
      */
     public Product createProduct(Product product, String username) {
         validateProduct(product, username);
-
         Product saved = productRepository.save(product);
         invalidateCache();
-        auditRepository.save(new AuditRecord(LocalDateTime.now(), username,
-                "CREATE_PRODUCT", "id=" + saved.getId()));
         metrics.recordCreate();
         return saved;
     }
@@ -66,8 +57,6 @@ public class ProductServiceImpl  implements ProductService {
 
         productRepository.save(existing);
         invalidateCache();
-        auditRepository.save(new AuditRecord(LocalDateTime.now(), username,
-                "UPDATE_PRODUCT", "id=" + id));
         metrics.recordUpdate();
         return Optional.of(existing);
     }
@@ -79,8 +68,6 @@ public class ProductServiceImpl  implements ProductService {
         if (productRepository.findById(id).isPresent()) {
             productRepository.deleteById(id);
             invalidateCache();
-            auditRepository.save(new AuditRecord(LocalDateTime.now(), username,
-                    "DELETE_PRODUCT", "id=" + id));
             metrics.recordDelete();
             return true;
         }
@@ -112,11 +99,9 @@ public class ProductServiceImpl  implements ProductService {
         long started = System.nanoTime();
         String key = buildCacheKey(category, brand, minPrice, maxPrice, text);
 
-        // 1) попытка из кэша
         List<Product> result = getFromCache(key);
         boolean fromCache = result != null;
 
-        // 2) если не было в кэше — считаем и кладём
         if (!fromCache) {
             result = filterProducts(category, brand, minPrice, maxPrice, text);
             putToCache(key, result);
@@ -195,41 +180,28 @@ public class ProductServiceImpl  implements ProductService {
     /** Имя товара обязательно и не может быть пустым. */
     private void validateName(Product product, String username) {
         if (product.getName() == null || product.getName().isBlank()) {
-            validationError("Название товара не может быть пустым", username);
+            throw new ProductValidationException("Название товара не может быть пустым");
         }
     }
 
     /** Категория товара обязательна. */
     private void validateCategory(Product product, String username) {
         if (product.getCategory() == null) {
-            validationError("Категория товара должна быть указана", username);
+            throw new ProductValidationException("Категория товара должна быть указана");
         }
     }
 
     /** Цена должна быть указана (не null). */
     private void validatePricePresent(Product product, String username) {
         if (product.getPrice() == null) {
-            validationError("Цена товара должна быть указана", username);
+            throw new ProductValidationException("Цена товара должна быть указана");
         }
     }
 
     /** Цена не может быть отрицательной. */
     private void validatePriceNonNegative(Product product, String username) {
         if (product.getPrice() != null && product.getPrice().compareTo(BigDecimal.ZERO) < 0) {
-            validationError("Цена товара не может быть отрицательной", username);
+            throw new ProductValidationException("Цена товара не может быть отрицательной");
         }
-    }
-
-    /**
-     * Логирует ошибку в аудит и выбрасывает исключение валидации.
-     */
-    private void validationError(String message, String username) {
-        auditRepository.save(new AuditRecord(
-                LocalDateTime.now(),
-                username,
-                "PRODUCT_VALIDATION_ERROR",
-                message
-        ));
-        throw new ProductValidationException(message);
     }
 }

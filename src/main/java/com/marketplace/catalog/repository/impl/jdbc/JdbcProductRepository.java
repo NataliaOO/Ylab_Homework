@@ -1,6 +1,5 @@
 package com.marketplace.catalog.repository.impl.jdbc;
 
-import com.marketplace.catalog.config.AppConfig;
 import com.marketplace.catalog.exception.RepositoryException;
 import com.marketplace.catalog.model.Category;
 import com.marketplace.catalog.model.Product;
@@ -15,13 +14,7 @@ import java.util.*;
  * JDBC-реализация репозитория товаров.
  */
 public class JdbcProductRepository implements ProductRepository {
-    // ---- Константы схемы и таблицы -----------------------------------------
-
-    private static final String PROP_SCHEMA = "db.schema";
-    private static final String SCHEMA      = AppConfig.get(PROP_SCHEMA);
-
     private static final String TABLE_NAME  = "product";
-    private static final String TBL_PRODUCTS = SCHEMA + "." + TABLE_NAME;
 
     // ---- Имена колонок -----------------------------------------------------
 
@@ -38,58 +31,74 @@ public class JdbcProductRepository implements ProductRepository {
     private static final String SQL_INSERT = """
             INSERT INTO %s (%s, %s, %s, %s, %s)
             VALUES (?, ?, ?, ?, ?)
-            RETURNING %s
-            """.formatted(
-            TBL_PRODUCTS,
-            COL_NAME, COL_BRAND, COL_CATEGORY, COL_PRICE, COL_DESCRIPTION,
-            COL_ID
-    );
+            RETURNING %s""";
 
     private static final String SQL_UPDATE = """
             UPDATE %s
             SET %s = ?, %s = ?, %s = ?, %s = ?, %s = ?
-            WHERE %s = ?
-            """.formatted(
-            TBL_PRODUCTS,
-            COL_NAME, COL_BRAND, COL_CATEGORY, COL_PRICE, COL_DESCRIPTION,
-            COL_ID
-    );
+            WHERE %s = ?""";
 
     private static final String SQL_FIND_BY_ID = """
             SELECT %s, %s, %s, %s, %s, %s
             FROM %s
-            WHERE %s = ?
-            """.formatted(
-            COL_ID, COL_NAME, COL_BRAND, COL_CATEGORY, COL_PRICE, COL_DESCRIPTION,
-            TBL_PRODUCTS,
-            COL_ID
-    );
+            WHERE %s = ?""";
 
     private static final String SQL_FIND_ALL = """
             SELECT %s, %s, %s, %s, %s, %s
             FROM %s
-            ORDER BY %s
-            """.formatted(
-            COL_ID, COL_NAME, COL_BRAND, COL_CATEGORY, COL_PRICE, COL_DESCRIPTION,
-            TBL_PRODUCTS,
-            COL_ID
-    );
+            ORDER BY %s""";
 
     private static final String SQL_DELETE_BY_ID =
-            "DELETE FROM " + TBL_PRODUCTS + " WHERE " + COL_ID + " = ?";
+            "DELETE FROM %s WHERE %s = ?";
 
     private static final String SQL_COUNT =
-            "SELECT COUNT(*) FROM " + TBL_PRODUCTS;
+            "SELECT COUNT(*) FROM %s";
 
     private static final String ERR_INSERT = "Insert product failed";
     private static final String ERR_UPDATE = "Update product failed";
     private static final String ERR_QUERY  = "Query product failed";
     private static final String ERR_DELETE = "Delete product failed";
     private final ConnectionFactory connectionFactory;
+    private final String tableProducts;
+    private final String sqlInsert;
+    private final String sqlUpdate;
+    private final String sqlFindById;
+    private final String sqlFindAll;
+    private final String sqlDeleteById;
+    private final String sqlCount;
 
-    public JdbcProductRepository(ConnectionFactory connectionFactory) {
+    public JdbcProductRepository(ConnectionFactory connectionFactory, String schema) {
         this.connectionFactory = connectionFactory;
+        this.tableProducts = schema + "." + TABLE_NAME;
+        this.sqlInsert = SQL_INSERT.formatted(
+                tableProducts,
+                COL_NAME, COL_BRAND, COL_CATEGORY, COL_PRICE, COL_DESCRIPTION,
+                COL_ID
+        );
 
+        this.sqlUpdate = SQL_UPDATE.formatted(
+                tableProducts,
+                COL_NAME, COL_BRAND, COL_CATEGORY, COL_PRICE, COL_DESCRIPTION,
+                COL_ID
+        );
+
+        this.sqlFindById = SQL_FIND_BY_ID.formatted(
+                COL_ID, COL_NAME, COL_BRAND, COL_CATEGORY, COL_PRICE, COL_DESCRIPTION,
+                tableProducts,
+                COL_ID
+        );
+
+        this.sqlFindAll = SQL_FIND_ALL.formatted(
+                COL_ID, COL_NAME, COL_BRAND, COL_CATEGORY, COL_PRICE, COL_DESCRIPTION,
+                tableProducts,
+                COL_ID
+        );
+
+        this.sqlDeleteById = SQL_DELETE_BY_ID.formatted(
+                tableProducts, COL_ID
+        );
+
+        this.sqlCount = SQL_COUNT.formatted(tableProducts);
     }
 
     @Override
@@ -103,7 +112,7 @@ public class JdbcProductRepository implements ProductRepository {
 
     private Product insert(Product p) {
         try (Connection c = connectionFactory.getConnection();
-             PreparedStatement ps = c.prepareStatement(SQL_INSERT)) {
+             PreparedStatement ps = c.prepareStatement(sqlInsert)) {
 
             ps.setString(1, p.getName());
             ps.setString(2, p.getBrand());
@@ -124,7 +133,7 @@ public class JdbcProductRepository implements ProductRepository {
 
     private Product update(Product p) {
         try (Connection c = connectionFactory.getConnection();
-             PreparedStatement ps = c.prepareStatement(SQL_UPDATE)) {
+             PreparedStatement ps = c.prepareStatement(sqlUpdate)) {
 
             ps.setString(1, p.getName());
             ps.setString(2, p.getBrand());
@@ -143,7 +152,7 @@ public class JdbcProductRepository implements ProductRepository {
     @Override
     public Optional<Product> findById(Long id) {
         try (Connection c = connectionFactory.getConnection();
-             PreparedStatement ps = c.prepareStatement(SQL_FIND_BY_ID)) {
+             PreparedStatement ps = c.prepareStatement(sqlFindById)) {
 
             ps.setLong(1, id);
             try (ResultSet rs = ps.executeQuery()) {
@@ -160,7 +169,7 @@ public class JdbcProductRepository implements ProductRepository {
     @Override
     public List<Product> findAll() {
         try (Connection c = connectionFactory.getConnection();
-             PreparedStatement ps = c.prepareStatement(SQL_FIND_ALL);
+             PreparedStatement ps = c.prepareStatement(sqlFindAll);
              ResultSet rs = ps.executeQuery()) {
 
             List<Product> result = new ArrayList<>();
@@ -176,7 +185,7 @@ public class JdbcProductRepository implements ProductRepository {
     @Override
     public void deleteById(Long id) {
         try (Connection c = connectionFactory.getConnection();
-             PreparedStatement ps = c.prepareStatement(SQL_DELETE_BY_ID)) {
+             PreparedStatement ps = c.prepareStatement(sqlDeleteById)) {
 
             ps.setLong(1, id);
             ps.executeUpdate();
@@ -188,7 +197,7 @@ public class JdbcProductRepository implements ProductRepository {
     @Override
     public long count() {
         try (Connection c = connectionFactory.getConnection();
-             PreparedStatement ps = c.prepareStatement(SQL_COUNT);
+             PreparedStatement ps = c.prepareStatement(sqlCount);
              ResultSet rs = ps.executeQuery()) {
 
             return rs.next() ? rs.getLong(1) : 0L;

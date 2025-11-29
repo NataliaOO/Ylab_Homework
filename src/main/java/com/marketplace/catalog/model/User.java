@@ -10,7 +10,7 @@ import lombok.ToString;
  */
 @Getter
 @Setter
-@ToString
+@ToString(exclude = "password")
 public class User {
 
     private Long id;
