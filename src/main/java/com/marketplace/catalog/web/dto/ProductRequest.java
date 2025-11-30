@@ -5,12 +5,12 @@ import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import java.math.BigDecimal;
 
 @Getter @Setter
+@AllArgsConstructor
 public class ProductRequest {
 
     @NotBlank
@@ -30,4 +30,7 @@ public class ProductRequest {
 
     @Size(max = 2000)
     private String description;
+
+    public ProductRequest() {
+    }
 }

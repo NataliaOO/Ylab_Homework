@@ -7,7 +7,11 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 
-@Mapper(componentModel = "default")
+/**
+ * MapStruct-мэппер между сущностью {@link com.marketplace.catalog.model.Product}
+ * и DTO-объектами ({@link ProductDto}, {@link ProductRequest}).
+*/
+ @Mapper(componentModel = "default")
 public interface ProductMapper {
 
     ProductDto toDto(Product product);

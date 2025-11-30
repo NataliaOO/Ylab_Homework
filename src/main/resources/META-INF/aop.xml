@@ -1,9 +1,0 @@
-<aspectj>
-    <aspects>
-        <aspect name="com.marketplace.catalog.aspect.LoggingAspect"/>
-        <aspect name="com.marketplace.catalog.aspect.AuditAspect"/>
-    </aspects>
-    <weaver>
-        <include within="com.marketplace.catalog..*"/>
-    </weaver>
-</aspectj>

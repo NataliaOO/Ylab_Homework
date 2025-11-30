@@ -3,11 +3,16 @@ package com.marketplace.catalog.aspect;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
+import org.springframework.stereotype.Component;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+/**
+ * Аспект логирования длительности выполнения сервисных и репозиторных методов.
+ */
 @Aspect
+@Component
 public class LoggingAspect {
 
     private static final Logger log = Logger.getLogger(LoggingAspect.class.getName());

@@ -1,0 +1,8 @@
+db:
+  url: jdbc:postgresql://localhost:5432/appdb
+  user: appuser
+  password: apppass
+  schema: catalog
+
+liquibase:
+  changelog: db/changelog/db.changelog-master.xml

@@ -3,7 +3,9 @@
 Внутренний сервис маркетплейса для управления каталогом товаров.
 Реализован на Jakarta Servlet API (без Spring), PostgreSQL, 
 Liquibase, JDBC, Jackson, DTO + MapStruct, валидацией, ролевой авторизацией и Tomcat.
+
 ---
+
 ## 1. Возможности сервиса
 
 ### 📦 Каталог товаров
@@ -55,7 +57,8 @@ Liquibase, JDBC, Jackson, DTO + MapStruct, валидацией, ролевой 
 - Liquibase (XML changelog’и)
 - JDBC
 - MapStruct
-- Jakarta Servlet API
+- Spring MVC
+- Swagger UI
 - Testcontainers (PostgreSQL)
 - Docker + docker-compose
 
@@ -107,6 +110,11 @@ docker ps
 - записывает в лог Class.method — X ms.
 
 Это улучшает наблюдаемость системы и позволяет быстро находить медленные операции.
+
+🌐 Интеграция с Swagger (springdoc-openapi)
+- Подключен Swagger UI для документации API.
+- Описание API доступно по пути /swagger-ui/index.html.
+- Все эндпоинты автоматически генерируют документацию OpenAPI.
 
 ## 6. Сборка WAR-файла
 Из корня проекта:
