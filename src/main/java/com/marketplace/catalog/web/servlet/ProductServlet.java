@@ -57,8 +57,6 @@ public class ProductServlet extends HttpServlet {
         this.validator      = ctx.getValidator();
     }
 
-    // ---------- READ ----------
-
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         prepareJsonResponse(resp);
@@ -81,8 +79,6 @@ public class ProductServlet extends HttpServlet {
             sendInternalError(resp, e);
         }
     }
-
-    // ---------- CREATE ----------
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
@@ -111,12 +107,9 @@ public class ProductServlet extends HttpServlet {
         }
     }
 
-    // ---------- UPDATE ----------
-
     @Override
     protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         prepareJsonResponse(resp);
-
         User user = requireAdmin(req, resp);
         if (user == null) {
             return;
@@ -149,8 +142,6 @@ public class ProductServlet extends HttpServlet {
             sendInternalError(resp, e);
         }
     }
-
-    // ---------- DELETE ----------
 
     @Override
     protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws IOException {

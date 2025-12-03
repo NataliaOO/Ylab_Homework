@@ -2,6 +2,7 @@ package com.marketplace.catalog.web.servlet;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.marketplace.catalog.config.AppContext;
+import com.marketplace.catalog.model.User;
 import com.marketplace.catalog.service.AuthService;
 import com.marketplace.catalog.web.dto.AuthRequest;
 import com.marketplace.catalog.web.dto.ErrorResponse;
@@ -18,6 +19,12 @@ import java.io.IOException;
 
 @WebServlet(name = "AuthServlet", urlPatterns = "/api/auth/*")
 public class AuthServlet extends HttpServlet {
+
+    private static final String ATTR_CURRENT_USER = "currentUser";
+
+    private static final String MSG_UNKNOWN_ENDPOINT    = "Unknown auth endpoint";
+    private static final String MSG_INVALID_CREDENTIALS = "Invalid login or password";
+    private static final String MSG_NOT_LOGGED_IN       = "Not logged in";
 
     private AuthService authService;
     private ObjectMapper objectMapper;
@@ -42,22 +49,16 @@ public class AuthServlet extends HttpServlet {
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         prepareJson(resp);
 
-        String path = req.getPathInfo(); // /login или /logout
+        String path = req.getPathInfo();
         if (path == null) {
-            resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
-            objectMapper.writeValue(resp.getWriter(),
-                    new ErrorResponse("Unknown auth endpoint", null));
+            sendUnknownEndpoint(resp);
             return;
         }
 
         switch (path) {
             case "/login" -> handleLogin(req, resp);
             case "/logout" -> handleLogout(req, resp);
-            default -> {
-                resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
-                objectMapper.writeValue(resp.getWriter(),
-                        new ErrorResponse("Unknown auth endpoint", null));
-            }
+            default -> sendUnknownEndpoint(resp);
         }
     }
 
@@ -69,27 +70,22 @@ public class AuthServlet extends HttpServlet {
         if ("/me".equals(path)) {
             handleMe(req, resp);
         } else {
-            resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
-            objectMapper.writeValue(resp.getWriter(),
-                    new ErrorResponse("Unknown auth endpoint", null));
+            sendUnknownEndpoint(resp);
         }
     }
 
     private void handleLogin(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         AuthRequest authRequest = objectMapper.readValue(req.getInputStream(), AuthRequest.class);
 
-        boolean ok = authService.login(authRequest.getLogin(), authRequest.getPassword());
-        if (!ok) {
-            resp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            objectMapper.writeValue(resp.getWriter(),
-                    new ErrorResponse("Invalid login or password", null));
+        var userOpt = authService.login(authRequest.getLogin(), authRequest.getPassword());
+        if (userOpt.isEmpty()) {
+            sendInvalidCredentials(resp);
             return;
         }
 
-        var user = authService.getCurrentUser();
-
+        User user = userOpt.get();
         HttpSession session = req.getSession(true);
-        session.setAttribute("currentUser", user);
+        session.setAttribute(ATTR_CURRENT_USER, user);
 
         resp.setStatus(HttpServletResponse.SC_OK);
         objectMapper.writeValue(resp.getWriter(),
@@ -100,34 +96,61 @@ public class AuthServlet extends HttpServlet {
     private void handleLogout(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         HttpSession session = req.getSession(false);
         if (session != null) {
-            session.removeAttribute("currentUser");
+            User user = (User) session.getAttribute(ATTR_CURRENT_USER);
+            if (user != null) {
+                authService.logout(user.getLogin());
+            }
+            session.invalidate();
         }
-        authService.logout();
-
         resp.setStatus(HttpServletResponse.SC_NO_CONTENT);
     }
 
     private void handleMe(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        HttpSession session = req.getSession(false);
-        if (session == null) {
-            resp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            objectMapper.writeValue(resp.getWriter(),
-                    new ErrorResponse("Not logged in", null));
-            return;
-        }
-
-        var user = (com.marketplace.catalog.model.User) session.getAttribute("currentUser");
+        User user = getCurrentUserOrSend401(req, resp);
         if (user == null) {
-            resp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            objectMapper.writeValue(resp.getWriter(),
-                    new ErrorResponse("Not logged in", null));
             return;
         }
 
         resp.setStatus(HttpServletResponse.SC_OK);
         objectMapper.writeValue(resp.getWriter(),
-                new UserDto(user.getId(), user.getLogin(),
-                        user.getRole() != null ? user.getRole().name() : null));
+                new UserDto(
+                        user.getId(),
+                        user.getLogin(),
+                        user.getRole() != null ? user.getRole().name() : null
+                )
+        );
+    }
+
+    private User getCurrentUserOrSend401(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        HttpSession session = req.getSession(false);
+        if (session == null) {
+            sendNotLoggedIn(resp);
+            return null;
+        }
+
+        User user = (User) session.getAttribute(ATTR_CURRENT_USER);
+        if (user == null) {
+            sendNotLoggedIn(resp);
+            return null;
+        }
+        return user;
+    }
+
+    private void sendUnknownEndpoint(HttpServletResponse resp) throws IOException {
+        sendError(resp, HttpServletResponse.SC_NOT_FOUND, MSG_UNKNOWN_ENDPOINT);
+    }
+
+    private void sendInvalidCredentials(HttpServletResponse resp) throws IOException {
+        sendError(resp, HttpServletResponse.SC_UNAUTHORIZED, MSG_INVALID_CREDENTIALS);
+    }
+
+    private void sendNotLoggedIn(HttpServletResponse resp) throws IOException {
+        sendError(resp, HttpServletResponse.SC_UNAUTHORIZED, MSG_NOT_LOGGED_IN);
+    }
+
+    private void sendError(HttpServletResponse resp, int status, String message) throws IOException {
+        resp.setStatus(status);
+        objectMapper.writeValue(resp.getWriter(), new ErrorResponse(message, null));
     }
 
     private void prepareJson(HttpServletResponse resp) {

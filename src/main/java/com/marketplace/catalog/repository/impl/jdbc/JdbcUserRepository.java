@@ -15,14 +15,10 @@ import java.util.Optional;
 public class JdbcUserRepository implements UserRepository {
     private static final String TABLE_NAME  = "users";
 
-    // ---- Колонки -----------------------------------------------------------
-
     private static final String COL_ID       = "id";
     private static final String COL_LOGIN    = "login";
     private static final String COL_PASSWORD = "password";
     private static final String COL_ROLE     = "role";
-
-    // ---- SQL ---------------------------------------------------------------
 
     private static final String SQL_INSERT = """
             INSERT INTO %s (%s, %s, %s)

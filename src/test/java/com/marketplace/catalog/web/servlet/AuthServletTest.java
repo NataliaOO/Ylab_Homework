@@ -15,6 +15,7 @@ import org.junit.jupiter.api.Test;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.Optional;
 
 import static com.marketplace.catalog.web.servlet.TestUtils.toServletInputStream;
 import static org.junit.jupiter.api.Assertions.*;
@@ -49,10 +50,9 @@ class AuthServletTest {
                 """;
         when(req.getInputStream()).thenReturn(toServletInputStream(json));
 
-        when(authService.login("admin", "secret")).thenReturn(true);
-
         User current = new User(1L, "admin", "secret", Role.ADMIN);
-        when(authService.getCurrentUser()).thenReturn(current);
+        when(authService.login("admin", "secret"))
+                .thenReturn(Optional.of(current));
 
         StringWriter sw = new StringWriter();
         when(resp.getWriter()).thenReturn(new PrintWriter(sw));
@@ -83,8 +83,8 @@ class AuthServletTest {
                 {"login":"admin","password":"wrong"}
                 """;
         when(req.getInputStream()).thenReturn(toServletInputStream(json));
-
-        when(authService.login("admin", "wrong")).thenReturn(false);
+        when(authService.login("admin", "wrong"))
+                .thenReturn(Optional.empty());
 
         StringWriter sw = new StringWriter();
         when(resp.getWriter()).thenReturn(new PrintWriter(sw));
@@ -93,8 +93,8 @@ class AuthServletTest {
         servlet.doPost(req, resp);
 
         // then
+        verify(authService).login("admin", "wrong");
         verify(resp).setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-        verify(authService, never()).getCurrentUser();
 
         ErrorResponse error = objectMapper.readValue(sw.toString(), ErrorResponse.class);
         assertEquals("Invalid login or password", error.message());
@@ -168,8 +168,8 @@ class AuthServletTest {
         servlet.doPost(req, resp);
 
         // then
-        verify(session).removeAttribute("currentUser");
-        verify(authService).logout();
+        verify(session).invalidate();
         verify(resp).setStatus(HttpServletResponse.SC_NO_CONTENT);
+        verifyNoMoreInteractions(authService);
     }
 }

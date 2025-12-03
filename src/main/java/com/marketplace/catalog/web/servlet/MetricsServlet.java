@@ -21,6 +21,12 @@ import java.util.List;
 @WebServlet(name = "MetricsServlet", urlPatterns = "/api/metrics")
 public class MetricsServlet extends HttpServlet {
 
+    private static final String ATTR_CURRENT_USER = "currentUser";
+
+    private static final String MSG_NOT_AUTHORIZED   = "Not authorized";
+    private static final String MSG_LOGIN_REQUIRED   = "Login required";
+    private static final String MSG_ADMIN_REQUIRED   = "Admin role required";
+
     private Metrics metrics;
     private ObjectMapper objectMapper;
 
@@ -43,19 +49,15 @@ public class MetricsServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        resp.setContentType("application/json");
-        resp.setCharacterEncoding("UTF-8");
+        prepareJson(resp);
+
         User user = getCurrentUser(req);
         if (user == null) {
-            resp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            objectMapper.writeValue(resp.getWriter(),
-                    new ErrorResponse("Not authorized", List.of("Login required")));
+            sendUnauthorized(resp, MSG_NOT_AUTHORIZED, List.of(MSG_LOGIN_REQUIRED));
             return;
         }
         if (user.getRole() != Role.ADMIN) {
-            resp.setStatus(HttpServletResponse.SC_FORBIDDEN);
-            objectMapper.writeValue(resp.getWriter(),
-                    new ErrorResponse("Admin role required", null));
+            sendForbidden(resp, MSG_ADMIN_REQUIRED);
             return;
         }
 
@@ -78,6 +80,24 @@ public class MetricsServlet extends HttpServlet {
         if (session == null) {
             return null;
         }
-        return (User) session.getAttribute("currentUser");
+        return (User) session.getAttribute(ATTR_CURRENT_USER);
+    }
+
+    private void sendUnauthorized(HttpServletResponse resp, String message, List<String> details) throws IOException {
+        sendError(resp, HttpServletResponse.SC_UNAUTHORIZED, message, details);
+    }
+
+    private void sendForbidden(HttpServletResponse resp, String message) throws IOException {
+        sendError(resp, HttpServletResponse.SC_FORBIDDEN, message, null);
+    }
+
+    private void sendError(HttpServletResponse resp, int status, String message, List<String> details) throws IOException {
+        resp.setStatus(status);
+        objectMapper.writeValue(resp.getWriter(), new ErrorResponse(message, details));
+    }
+
+    private void prepareJson(HttpServletResponse resp) {
+        resp.setContentType("application/json");
+        resp.setCharacterEncoding("UTF-8");
     }
 }

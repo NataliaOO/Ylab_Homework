@@ -43,7 +43,7 @@ public class AppContext {
     private final Validator validator;
 
     public AppContext() {
-        this.config = new AppConfig(); // <-- вот тут твой существующий AppConfig
+        this.config = new AppConfig();
         this.connectionFactory = new ConnectionFactory(config);
 
         this.userRepository = new JdbcUserRepository(connectionFactory, config.getDbSchema());

@@ -2,6 +2,8 @@ package com.marketplace.catalog.service;
 
 import com.marketplace.catalog.model.User;
 
+import java.util.Optional;
+
 /**
  * Контракт сервиса авторизации пользователей.
  */
@@ -12,20 +14,7 @@ public interface AuthService {
      *
      * @return true, если вход успешен
      */
-    boolean login(String login, String password);
+    Optional<User> login(String login, String password);
 
-    /**
-     * Выполняет выход текущего пользователя.
-     */
-    void logout();
-
-    /**
-     * Является ли текущий пользователь администратором.
-     */
-    boolean isAdmin();
-
-    /**
-     * Текущий авторизованный пользователь (может быть null).
-     */
-    User getCurrentUser();
+    void logout(String login);
 }

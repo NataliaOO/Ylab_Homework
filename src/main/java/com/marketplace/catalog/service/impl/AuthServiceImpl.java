@@ -13,31 +13,17 @@ import java.util.Optional;
 @Getter
 public class AuthServiceImpl implements AuthService {
     private final UserRepository userRepository;
-    private User currentUser;
 
     public AuthServiceImpl (UserRepository userRepository) {
         this.userRepository = userRepository;
     }
 
     @Override
-    public boolean login(String login, String password) {
-        Optional<User> userOpt = userRepository.findByLogin(login);
-        if (userOpt.isPresent() && userOpt.get().getPassword().equals(password)) {
-            currentUser = userOpt.get();
-            return true;
-        }
-        return false;
+    public Optional<User> login(String login, String password) {
+        return userRepository.findByLogin(login)
+                .filter(user -> user.getPassword().equals(password));
     }
 
-    @Override
-    public void logout() {
-        currentUser = null;
-    }
-
-    @Override
-    public boolean isAdmin() {
-        return currentUser != null
-                && currentUser.getRole() != null
-                && currentUser.getRole().name().equals("ADMIN");
+    public void logout(String login) {
     }
 }

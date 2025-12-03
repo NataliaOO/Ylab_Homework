@@ -1,5 +1,6 @@
 package com.marketplace.catalog.web.dto;
 
+import com.marketplace.catalog.model.Category;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -20,8 +21,8 @@ public class ProductRequest {
     @Size(max = 255)
     private String brand;
 
-    @NotBlank
-    private String category;
+    @NotNull
+    private Category category;
 
     @NotNull
     @DecimalMin("0.0")

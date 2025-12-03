@@ -22,6 +22,5 @@ public class LiquibaseInitListener implements ServletContextListener {
 
     @Override
     public void contextDestroyed(ServletContextEvent sce) {
-        // тут нам ничего делать не нужно
     }
 }
