@@ -1,6 +1,5 @@
 package com.marketplace.catalog.repository.impl.jdbc;
 
-import com.marketplace.catalog.config.AppConfig;
 import com.marketplace.catalog.exception.RepositoryException;
 import com.marketplace.catalog.model.Role;
 import com.marketplace.catalog.model.User;
@@ -14,50 +13,45 @@ import java.util.Optional;
  * JDBC-репозиторий пользователей.
  */
 public class JdbcUserRepository implements UserRepository {
-// ---- Схема и таблица ---------------------------------------------------
-
-    private static final String PROP_SCHEMA = "db.schema";
-    private static final String SCHEMA      = AppConfig.get(PROP_SCHEMA);
-
     private static final String TABLE_NAME  = "users";
-    private static final String TBL_USERS   = SCHEMA + "." + TABLE_NAME;
-
-    // ---- Колонки -----------------------------------------------------------
 
     private static final String COL_ID       = "id";
     private static final String COL_LOGIN    = "login";
     private static final String COL_PASSWORD = "password";
     private static final String COL_ROLE     = "role";
 
-    // ---- SQL ---------------------------------------------------------------
-
     private static final String SQL_INSERT = """
             INSERT INTO %s (%s, %s, %s)
             VALUES (?, ?, ?)
-            RETURNING %s
-            """.formatted(
-            TBL_USERS,
-            COL_LOGIN, COL_PASSWORD, COL_ROLE,
-            COL_ID
-    );
+            RETURNING %s""";
 
     private static final String SQL_FIND_BY_LOGIN = """
             SELECT %s, %s, %s, %s
             FROM %s
-            WHERE %s = ?
-            """.formatted(
-            COL_ID, COL_LOGIN, COL_PASSWORD, COL_ROLE,
-            TBL_USERS,
-            COL_LOGIN
-    );
+            WHERE %s = ?""";
 
     private static final String ERR_INSERT = "Insert user failed";
     private static final String ERR_QUERY  = "Query user failed";
 
     private final ConnectionFactory connectionFactory;
+    private final String tableUsers;
+    private final String sqlFindByLogin;
+    private final String sqlInsert;
 
-    public JdbcUserRepository(ConnectionFactory connectionFactory) {
+    public JdbcUserRepository(ConnectionFactory connectionFactory, String schema) {
         this.connectionFactory = connectionFactory;
+        this.tableUsers = schema + "." + TABLE_NAME;
+
+        this.sqlFindByLogin = SQL_FIND_BY_LOGIN.formatted(
+                COL_ID, COL_LOGIN, COL_PASSWORD, COL_ROLE,
+                tableUsers,
+                COL_LOGIN
+        );
+        this.sqlInsert = SQL_INSERT.formatted(
+                tableUsers,
+                COL_LOGIN, COL_PASSWORD, COL_ROLE,
+                COL_ID
+        );
     }
 
     @Override
@@ -70,7 +64,7 @@ public class JdbcUserRepository implements UserRepository {
 
     private User insert(User u) {
         try (Connection c = connectionFactory.getConnection();
-             PreparedStatement ps = c.prepareStatement(SQL_INSERT)) {
+             PreparedStatement ps = c.prepareStatement(sqlInsert)) {
 
             ps.setString(1, u.getLogin());
             ps.setString(2, u.getPassword());
@@ -90,7 +84,7 @@ public class JdbcUserRepository implements UserRepository {
     @Override
     public Optional<User> findByLogin(String login) {
         try (Connection c = connectionFactory.getConnection();
-             PreparedStatement ps = c.prepareStatement(SQL_FIND_BY_LOGIN)) {
+             PreparedStatement ps = c.prepareStatement(sqlFindByLogin)) {
 
             ps.setString(1, login);
             try (ResultSet rs = ps.executeQuery()) {

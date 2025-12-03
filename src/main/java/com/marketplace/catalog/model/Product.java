@@ -14,8 +14,6 @@ import java.math.BigDecimal;
 @ToString
 public class Product implements Serializable {
 
-    private static final long serialVersionUID = 1L;
-
     /** Уникальный идентификатор товара. */
     private Long id;
     /** Название товара. */

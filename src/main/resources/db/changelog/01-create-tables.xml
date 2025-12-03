@@ -64,32 +64,4 @@
         </createIndex>
     </changeSet>
 
-    <changeSet id="01-create-audit-table" author="natalia">
-        <createTable schemaName="${app.schema}" tableName="audit">
-            <column name="id" type="BIGSERIAL">
-                <constraints primaryKey="true"
-                             nullable="false"
-                             primaryKeyName="pk_audit"/>
-            </column>
-
-            <!-- поле для AuditRecord.timestamp -->
-            <column name="created_at" type="TIMESTAMP">
-                <constraints nullable="false"/>
-            </column>
-
-            <!-- AuditRecord.username -->
-            <column name="username" type="VARCHAR(64)">
-                <constraints nullable="false"/>
-            </column>
-
-            <!-- AuditRecord.action -->
-            <column name="action" type="VARCHAR(64)">
-                <constraints nullable="false"/>
-            </column>
-
-            <!-- AuditRecord.details -->
-            <column name="details" type="TEXT"/>
-        </createTable>
-    </changeSet>
-
 </databaseChangeLog>

@@ -19,7 +19,7 @@ class JdbcProductRepositoryIT extends BasePgIT {
     @BeforeEach
     void setUp() throws Exception {
         truncate(TBL_PRODUCTS);
-        repo = new JdbcProductRepository();
+        repo = new JdbcProductRepository(connectionFactory, SCHEMA);
     }
 
     private Product newProduct(String name, BigDecimal price) {

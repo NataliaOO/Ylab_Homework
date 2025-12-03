@@ -18,5 +18,4 @@ public record AuditRecord(
         String action,
         String details
 ) implements Serializable {
-    private static final long serialVersionUID = 1L;
 }

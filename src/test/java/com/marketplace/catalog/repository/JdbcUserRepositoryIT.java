@@ -18,8 +18,7 @@ class JdbcUserRepositoryIT extends BasePgIT {
     @BeforeEach
     void setUp() throws Exception {
         truncate(TBL_USERS);
-
-        repo = new JdbcUserRepository();
+        repo = new JdbcUserRepository(connectionFactory, SCHEMA);
 
         User admin = new User(null, "admin", "admin", Role.ADMIN);
         repo.save(admin);
