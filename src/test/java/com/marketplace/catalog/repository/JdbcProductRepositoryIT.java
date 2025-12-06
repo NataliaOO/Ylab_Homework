@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 
-import static com.marketplace.catalog.TestConstants.*;
+import static com.marketplace.catalog.TestData.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 class JdbcProductRepositoryIT extends BasePgIT {
