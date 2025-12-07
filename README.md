@@ -224,3 +224,5 @@ user / user — роль VIEWER
 ```
 mvn test
 ```
+
+## Swagger
