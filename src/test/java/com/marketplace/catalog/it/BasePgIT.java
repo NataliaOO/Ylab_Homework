@@ -6,6 +6,8 @@ import com.marketplace.catalog.db.ConnectionFactory;
 import com.marketplace.catalog.db.LiquibaseRunner;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.TestInstance;
+import org.springframework.core.env.Environment;
+import org.springframework.core.env.StandardEnvironment;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -43,7 +45,8 @@ public abstract class BasePgIT {
         System.setProperty("db.password", PG.getPassword());
         System.setProperty("db.schema", SCHEMA);
 
-        config = new AppConfig();
+        Environment env = new StandardEnvironment();
+        config = new AppConfig(env);
         connectionFactory = new ConnectionFactory(config);
 
         new LiquibaseRunner(config, connectionFactory).migrate();

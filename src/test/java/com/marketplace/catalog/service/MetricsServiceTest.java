@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.concurrent.TimeUnit;
 
-import static com.marketplace.catalog.TestConstants.DELTA;
+import static com.marketplace.catalog.TestData.DELTA;
 import static org.junit.jupiter.api.Assertions.*;
 
 class MetricsServiceTest {

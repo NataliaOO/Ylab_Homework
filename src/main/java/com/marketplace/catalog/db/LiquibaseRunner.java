@@ -14,6 +14,7 @@ import java.sql.Connection;
 
 public final class LiquibaseRunner {
     private static final String PARAM_SCHEMA = "schema";
+    private static final String DEFAULT_LIQUIBASE_SCHEMA = "public";
 
     private final Config config;
     private final ConnectionFactory connectionFactory;
@@ -31,7 +32,7 @@ public final class LiquibaseRunner {
             Database database = DatabaseFactory.getInstance()
                     .findCorrectDatabaseImplementation(new JdbcConnection(conn));
 
-            database.setLiquibaseSchemaName("public");
+            database.setLiquibaseSchemaName(DEFAULT_LIQUIBASE_SCHEMA);
             database.setDefaultSchemaName(schema);
 
             Liquibase liquibase = new Liquibase(
